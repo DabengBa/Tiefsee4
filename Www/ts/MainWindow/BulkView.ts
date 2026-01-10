@@ -1087,10 +1087,11 @@ export class BulkView {
                 n -= 1;
             }
 
-            const temp = _pageNow + getDirPath();
-            const size = Math.floor(_domBulkViewContent.offsetWidth / getColumns());
-            const div = Lib.newDom(/*html*/`
+                const temp = _pageNow + getDirPath();
+                const size = Math.floor(_domBulkViewContent.offsetWidth / getColumns());
+                const div = Lib.newDom(/*html*/`
                 <div class="bulkView-item">
+                    <div class="bulkView-selection-indicator">${SvgList["yes.svg"]}</div>
                     <div class="bulkView-center bulkView-loading">
                         <img class="bulkView-img">
                     </div>
@@ -1156,29 +1157,59 @@ export class BulkView {
                 div.style.minHeight = size + "px";
                 updateSize(div);
 
-                // 點擊圖片後，退出大量瀏覽模式
-                div.addEventListener("click", async () => {
+                // 點擊圖片後，退出大量瀏覽模式或執行多選操作
+                div.addEventListener("click", async (e: MouseEvent) => {
+                    const path = fileInfo2.FullPath;
+                    const isCtrlKey = e.ctrlKey || e.metaKey;
+                    const isShiftKey = e.shiftKey;
+
                     if (div.getAttribute("data-reload") === "true") {
                         let newItemDom = await pathToItem(fileInfo2.Path);
                         div.insertAdjacentElement("afterend", newItemDom);
                         div.remove();
                         updateItemNumber(); // 更新左上角的圖片編號
-
                     } else if (n !== 0) {
+                        if (isCtrlKey) {
+                            // Ctrl+Click：切換選中狀態（不進入單張瀏覽）
+                            if (_selectedPaths.has(path)) {
+                                _selectedPaths.delete(path);
+                            } else {
+                                _selectedPaths.add(path);
+                            }
+                            _lastAnchorPath = path;
+                            updateSelectionVisuals();
+                        } else if (isShiftKey && _lastAnchorPath !== undefined) {
+                            // Shift+Click：從 lastAnchorPath 到當前項做區間選擇（不進入單張瀏覽）
+                            const anchorIndex = _arFile.indexOf(_lastAnchorPath);
+                            const currentIndex = _arFile.indexOf(path);
+                            if (anchorIndex !== -1 && currentIndex !== -1) {
+                                const start = Math.min(anchorIndex, currentIndex);
+                                const end = Math.max(anchorIndex, currentIndex);
+                                _selectedPaths.clear();
+                                for (let i = start; i <= end; i++) {
+                                    const itemPath = _arFile[i];
+                                    if (itemPath !== _svgIndentation) {
+                                        _selectedPaths.add(itemPath);
+                                    }
+                                }
+                                updateSelectionVisuals();
+                            }
+                        } else {
+                            // Click（無修飾鍵）：保持原有「點擊進入單張瀏覽」行為，且不改變選擇
+                            M.fileLoad.setIsBulkViewSub(true);
+                            let index = _arFile.indexOf(fileInfo2.FullPath);
 
-                        M.fileLoad.setIsBulkViewSub(true);
-                        let index = _arFile.indexOf(fileInfo2.FullPath);
+                            if (_arFile.length > 0 && _arFile[0] === _svgIndentation) { // 如果有使用首圖縮排
+                                index -= 1;
+                            }
+                            await M.script.bulkView.close(index);
 
-                        if (_arFile.length > 0 && _arFile[0] === _svgIndentation) { // 如果有使用首圖縮排
-                            index -= 1;
+                            // 設定返回按鈕
+                            M.toolbarBack.visible(true);
+                            M.toolbarBack.setEvent(() => {
+                                M.script.bulkView.show();
+                            });
                         }
-                        await M.script.bulkView.close(index);
-
-                        // 設定返回按鈕
-                        M.toolbarBack.visible(true);
-                        M.toolbarBack.setEvent(() => {
-                            M.script.bulkView.show();
-                        });
                     }
                 });
 
