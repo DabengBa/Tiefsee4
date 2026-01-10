@@ -3326,6 +3326,51 @@ export class Tiefseeview {
             return hasRotation || hasHorizontalMirror || hasVerticalMirror || hasZoom;
         };
 
+        /**
+         * 取得帶有變換（旋轉、鏡像、縮放）的 Canvas Blob
+         * @param {string} type 圖片類型，預設 "png"
+         * @param {number} quality 質量，預設 0.9
+         * @returns {Promise<Blob | null>} Canvas Blob
+         */
+        this.getTransformedCanvasBlob = async (type = "png", quality = 0.9) => {
+            const canvas = await getCanvas();
+            if (canvas === null) { return null; }
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const deg = this.getDeg();
+            const mirrorHorizontal = this.getMirrorHorizontal();
+            const mirrorVertical = this.getMirrorVertica();
+            const zoomRatio = this.getZoomRatio();
+
+            const newCanvas = document.createElement("canvas");
+            const ctx = newCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+            newCanvas.width = Math.floor(width * zoomRatio);
+            newCanvas.height = Math.floor(height * zoomRatio);
+
+            ctx.save();
+            ctx.translate(newCanvas.width / 2, newCanvas.height / 2);
+            ctx.rotate(deg * Math.PI / 180);
+
+            if (mirrorHorizontal || mirrorVertical) {
+                const scaleX = mirrorHorizontal ? -1 : 1;
+                const scaleY = mirrorVertical ? -1 : 1;
+                ctx.scale(scaleX, scaleY);
+            }
+
+            ctx.drawImage(canvas, -width / 2, -height / 2, width, height);
+            ctx.restore();
+
+            const blob = await new Promise<Blob | null>((resolve) => {
+                newCanvas.toBlob((b) => {
+                    resolve(b);
+                }, `image/${type}`, quality);
+            });
+
+            return blob;
+        };
+
     }
 }
 
