@@ -190,6 +190,14 @@ interface WV_Directory {
     /** 回傳資料夾裡面的子資料夾 */
     GetDirectories(path: string, searchPattern: string): string[];
 
+    /**
+     * 開啟 選擇資料夾 的視窗
+     * @param title 視窗標題
+     * @param initialPath 初始路徑
+     * @returns 返回用戶選擇的目錄路徑，取消時返回空字串
+     */
+    OpenFolderDialog(title: string, initialPath: string): string;
+
     /** 判斷指定路徑是否參考磁碟上的現有目錄 */
     Exists(path: string): bool;
 
@@ -272,6 +280,15 @@ interface WV_File {
      * @returns 錯誤訊息，成功的話回傳空字串
      */
     Move(sourceFileName: string, destFileName: string): string;
+
+    /**
+     * 複製檔案到新位置
+     * @param sourcePath 來源檔案路徑
+     * @param destPath 目標檔案路徑
+     * @param overwrite 是否覆蓋已存在的檔案
+     * @returns 錯誤訊息，成功的話回傳空字串
+     */
+    Copy(sourcePath: string, destPath: string, overwrite: boolean): string;
 
     /** 取得檔案的建立時間 */
     GetCreationTimeUtc(path: string): number;
