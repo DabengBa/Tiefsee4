@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Tiefsee;
 
@@ -278,5 +279,31 @@ public class WV_Directory {
         long unixTimestamp = toUnix(time);
         return unixTimestamp;
     }*/
+
+    /// <summary>
+    /// 開啟 選擇資料夾 的視窗
+    /// </summary>
+    /// <param name="title">視窗標題</param>
+    /// <param name="initialPath">初始路徑</param>
+    /// <returns>返回用戶選擇的目錄路徑，取消時返回空字串</returns>
+    public string OpenFolderDialog(string title, string initialPath) {
+        try {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog()) {
+                if (title != null && title != "") {
+                    dialog.Description = title;
+                }
+                if (initialPath != null && initialPath != "" && Directory.Exists(initialPath)) {
+                    dialog.SelectedPath = initialPath;
+                }
+                if (dialog.ShowDialog() == DialogResult.OK) {
+                    return dialog.SelectedPath;
+                }
+                return "";
+            }
+        }
+        catch (Exception e) {
+            return e.Message;
+        }
+    }
 
 }
