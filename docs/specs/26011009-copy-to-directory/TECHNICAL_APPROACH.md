@@ -96,6 +96,7 @@
     - 非输入焦点/非文本选择（复用 `Lib.isTextFocused()` / `Lib.isTxtSelect()`）
     - `Shortcut.match(e, settings.copyToDirectory.shortcut) === true`
   - 调用：`M.script.copy.copyToDirectory()`（或更清晰地 `M.copyToDirectory.run()`）
+  - 注意：`Hotkey.ts` 在 Bulk View 分支内会提前 `return`，需要确保“复制到目录”的快捷键在普通模式与 Bulk View 都能被处理到（避免只在普通模式生效）
 
 ### 4.2 源路径选择（普通 vs Bulk View）
 - 普通模式：`[M.fileLoad.getFilePath()]`
@@ -179,11 +180,10 @@
 - `lastAnchorPath?: string`（用于 Shift 区间选择）
 
 ### 6.2 交互规则（建议，便于实现且符合用户预期）
-- `Ctrl+Click`：toggle
-- `Shift+Click`：从 `lastAnchorPath` 到当前项做区间选择（需要 `_arFile` 的可索引序）
-- Click（无修饰键）：
-  - 若当前处于“多选模式”：清空选择并仅选中当前项（或直接进入单张浏览，需产品确认）
-  - 为避免破坏现有“点击进入单张”行为，建议新增一个显式选择入口（例如：顶部“选择”按钮/长按进入选择模式）——若本迭代必须纯键鼠实现，则在 PRD 再明确取舍
+- `Ctrl+Click`：toggle 选择状态（不触发“进入单张浏览”）
+- `Shift+Click`：从 `lastAnchorPath` 到当前项做区间选择（需要 `_arFile` 的可索引序；不触发“进入单张浏览”）
+- Click（无修饰键）：保持现有行为（点击进入单张浏览），避免引入交互回归
+- `Escape`：若 `selectedPaths.size > 0` 则优先清空选择；否则沿用现有行为（退出 Bulk View）
 
 ### 6.3 对外接口
 - `getSelectedPathsOrFallbackCurrent(): string[]`
@@ -191,7 +191,7 @@
 
 ## 7. 可测试性落地（不依赖 UI/Host 的核心逻辑）
 
-建议把以下逻辑做成纯函数，并用 `bun test` 覆盖关键路径（不引入第三方测试框架）：
+建议把以下逻辑做成纯函数，以便后续补测试覆盖。当前仓库前端构建链为 Node.js + npm + Gulp（未提供现成测试脚手架），因此本迭代可以先用“手动用例 + 关键逻辑自测函数”的方式降低风险；若要补自动化测试，再单独引入测试工具链：
 
 - `Shortcut`：
   - `normalizeShortcut("ctrl + alt + d") -> "Ctrl+Alt+D"`
@@ -213,4 +213,3 @@
 4) CopyToDirectoryService（先支持“复制原始文件”闭环）
 5) Bulk View 多选 + 批量复制
 6) TransformExport（新增导出 API + 保存确认 + 复制导出结果）
-
