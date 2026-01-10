@@ -326,4 +326,24 @@ public class WV_File {
         return FileLib.GetLastWriteTimeUtc(path);
     }
 
+    /// <summary>
+    /// 複製檔案到新位置
+    /// </summary>
+    /// <param name="sourcePath">來源檔案路徑</param>
+    /// <param name="destPath">目標檔案路徑</param>
+    /// <param name="overwrite">是否覆蓋已存在的檔案</param>
+    /// <returns>空字串表示成功，否則返回錯誤訊息</returns>
+    public string Copy(string sourcePath, string destPath, bool overwrite) {
+        try {
+            if (File.Exists(sourcePath) == false) {
+                return "Source file does not exist";
+            }
+            File.Copy(sourcePath, destPath, overwrite);
+            return "";
+        }
+        catch (Exception e) {
+            return e.Message;
+        }
+    }
+
 }

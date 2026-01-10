@@ -1,0 +1,156 @@
+id,issue_title,task_content,acceptance_criteria,project_progress,file_path,prd_link,tech_link,commit_message
+T001,新增 C# 文件复制 API WV_File.Copy,在 Tiefsee/VW/WV_File.cs 中新增 Copy 方法，支持文件复制操作，参数包括源路径、目标路径、是否覆盖，返回错误信息（空字符串表示成功）,1. WV_File.Copy 方法已实现，参数为 sourcePath, destPath, overwrite
+2. 返回空字符串表示成功，否则返回错误信息
+3. 支持覆盖模式和非覆盖模式
+4. 异常处理完善，能捕获文件操作异常,未开始,Tiefsee/VW/WV_File.cs,docs/specs/26011009-copy-to-directory/PRD.md#4-文件复制操作,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#51-wv_filecopy新增,feat: 新增 WV_File.Copy 文件复制 API
+T002,新增 C# 目录选择对话框 API WV_Directory.OpenFolderDialog,在 Tiefsee/VW/WV_Directory.cs 中新增 OpenFolderDialog 方法，使用 WinForms FolderBrowserDialog 实现目录选择对话框，支持标题和初始路径参数，返回选择的目录路径,1. WV_Directory.OpenFolderDialog 方法已实现，参数为 title, initialPath
+2. 使用 WinForms FolderBrowserDialog 实现
+3. 支持设置对话框标题和初始路径
+4. 返回用户选择的目录路径，取消时返回空字符串,未开始,Tiefsee/VW/WV_Directory.cs,docs/specs/26011009-copy-to-directory/PRD.md#2-目标目录设置,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#52-wv_directoryopenfolderdialog新增,feat: 新增 WV_Directory.OpenFolderDialog 目录选择对话框 API
+T003,同步 TS 声明文件 NetAPI.d.ts,在 Www/ts/d/NetAPI.d.ts 中新增 WV_File.Copy 和 WV_Directory.OpenFolderDialog 的 TypeScript 类型声明，确保类型安全,1. WV_File.Copy 的类型声明已添加，签名正确
+2. WV_Directory.OpenFolderDialog 的类型声明已添加，签名正确
+3. 参数和返回值类型与 C# 实现一致,未开始,Www/ts/d/NetAPI.d.ts,docs/specs/26011009-copy-to-directory/PRD.md#技术实现方案,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#5-跨层接口改动cs--ts-声明,feat: 同步 NetAPI.d.ts 新增 Copy 和 OpenFolderDialog 类型声明
+T004,扩展 Config.ts 配置结构,在 Www/ts/Config.ts 的 settings 中新增 copyToDirectory 配置对象，包含 enabled, targetPath, shortcut, onConflict, createDirIfNotExists, requireSaveWhenTransformed 字段，设置合理的默认值,1. copyToDirectory 配置对象已添加到 settings
+2. 包含所有必需字段：enabled, targetPath, shortcut, onConflict, createDirIfNotExists, requireSaveWhenTransformed
+3. 默认值设置合理：enabled=false, shortcut="F1", onConflict="renameTimestamp", createDirIfNotExists=true, requireSaveWhenTransformed=true,未开始,Www/ts/Config.ts,docs/specs/26011009-copy-to-directory/PRD.md#技术实现方案,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#31-settingjson新增字段,feat: 扩展 Config.ts 新增 copyToDirectory 配置
+T005,新增国际化文本 langData.js,在 Www/lang/langData.js 中添加复制到目录功能所需的多语言文本，包括成功/失败提示、错误信息、确认对话框等，支持 zh-TW, zh-CN, en 三种语言,1. msg.copyToDirSuccess 已添加，支持三种语言
+2. msg.copyToDirBatchSuccess 已添加，支持三种语言
+3. msg.copyToDirFailed 已添加，支持三种语言
+4. msg.copyToDirNeedSaveConfirm 已添加，支持三种语言
+5. msg.fileNotFound 已添加，支持三种语言
+6. msg.targetPathNotSet 已添加，支持三种语言
+7. msg.targetDirNotExists 已添加，支持三种语言
+8. msg.fileSkipped 已添加，支持三种语言
+9. msg.shortcutConflict 已添加，支持三种语言,未开始,Www/lang/langData.js,docs/specs/26011009-copy-to-directory/PRD.md#国际化支持,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#4-关键流程端到端,feat: 新增复制到目录功能国际化文本
+T006,创建 Shortcut 快捷键模块,创建 Www/ts/Shortcut.ts 模块，实现快捷键解析、规范化、匹配和冲突检测功能，提供 parse, normalize, match, isConflict 等纯函数，支持单键和组合键,1. Shortcut 模块已创建，包含 parse, normalize, match, isConflict 方法
+2. 支持解析 "ctrl + alt + d" 等格式
+3. 规范化输出为 "Ctrl+Alt+D" 格式
+4. match 方法能正确匹配 KeyboardEvent
+5. isConflict 方法能检测快捷键冲突
+6. 所有方法为纯函数，易于测试,未开始,Www/ts/Shortcut.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#1-代码心智地图现状入口与可复用能力,feat: 创建 Shortcut 快捷键模块
+T007,在 SettingWindow 添加复制到目录配置 UI,在 Www/ts/SettingWindow/SettingWindow.ts 中添加"复制到目录"设置面板，包含功能开关、目标目录输入框和浏览按钮、快捷键输入框、同名文件处理下拉框、自动创建目录复选框、保存确认复选框,1. "复制到目录"设置面板已添加到设置窗口
+2. 包含功能开关复选框（copyToDirectory.enabled）
+3. 包含目标目录输入框和浏览按钮（copyToDirectory.targetPath）
+4. 包含快捷键输入框（copyToDirectory.shortcut）
+5. 包含同名文件处理下拉框（copyToDirectory.onConflict）
+6. 包含自动创建目录复选框（copyToDirectory.createDirIfNotExists）
+7. 包含保存确认复选框（copyToDirectory.requireSaveWhenTransformed）
+8. 浏览按钮调用 WV_Directory.OpenFolderDialog
+9. 配置保存和加载正常工作,未开始,Www/ts/SettingWindow/SettingWindow.ts,docs/specs/26011009-copy-to-directory/PRD.md#技术实现方案,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#4-设置界面,feat: 在 SettingWindow 添加复制到目录配置 UI
+T008,实现快捷键冲突检测逻辑,在 SettingWindow 中实现快捷键冲突检测，当用户设置快捷键时检查是否与 Tiefsee 内置快捷键或其他可配置快捷键冲突，冲突时显示警告并阻止保存,1. 用户输入快捷键时实时检测冲突
+2. 与 Tiefsee 内置快捷键冲突时显示警告
+3. 与其他可配置快捷键冲突时显示警告
+4. 冲突时阻止保存配置
+5. 警告信息使用 msg.shortcutConflict 国际化文本,未开始,Www/ts/SettingWindow/SettingWindow.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#32-快捷键字符串规范可测试可冲突检测,feat: 实现快捷键冲突检测逻辑
+T009,在 Hotkey.ts 添加复制到目录快捷键处理,在 Www/ts/MainWindow/Hotkey.ts 的 keydown 事件处理中添加复制到目录快捷键分支，检查功能启用状态、非输入焦点、快捷键匹配，调用 M.script.copy.copyToDirectory(),1. 在 keydown 事件中添加复制到目录快捷键处理
+2. 检查 copyToDirectory.enabled === true
+3. 检查非输入焦点（Lib.isTextFocused() === false）
+4. 检查非文本选择（Lib.isTxtSelect() === false）
+5. 使用 Shortcut.match 匹配快捷键
+6. 调用 M.script.copy.copyToDirectory()
+7. 快捷键仅在 Tiefsee 窗口聚焦时生效,未开始,Www/ts/MainWindow/Hotkey.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#41-触发入口hotkeyts,feat: 在 Hotkey.ts 添加复制到目录快捷键处理
+T010,在 ScriptCopy 添加 copyToDirectory 方法框架,在 Www/ts/MainWindow/Script.ts 的 ScriptCopy 类中添加 copyToDirectory 方法框架，实现配置检查、目标目录验证、源路径获取等基础逻辑,1. copyToDirectory 方法已添加到 ScriptCopy 类
+2. 检查功能是否启用（config.enabled）
+3. 验证目标目录是否设置
+4. 获取待复制的路径列表（普通模式或 Bulk View）
+5. 检查目标目录是否存在，根据配置决定是否创建
+6. 方法签名正确，支持异步执行,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#技术实现方案,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#42-源路径选择普通-vs-bulk-view,feat: 在 ScriptCopy 添加 copyToDirectory 方法框架
+T011,实现时间戳重命名逻辑,在 ScriptCopy 类中实现 resolveConflictPath 方法，支持时间戳重命名策略，格式为 baseName_yyyyMMdd_HHmmss_fff.ext，若仍冲突则追加 _1/_2...,1. resolveConflictPath 方法已实现
+2. 时间戳格式为 yyyyMMdd_HHmmss_fff
+3. 若目标文件已存在，追加时间戳
+4. 若时间戳后仍冲突，追加 _1/_2...
+5. 支持 overwrite 和 skip 策略
+6. 正确处理文件扩展名,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#高级功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#45-同名冲突处理默认时间戳,feat: 实现时间戳重命名逻辑
+T012,实现文件复制核心逻辑,在 ScriptCopy 类中实现文件复制核心逻辑，调用 WV_File.Copy 执行复制操作，处理复制结果，显示成功或失败 Toast,1. 调用 WV_File.Copy 执行复制操作
+2. 根据 onConflict 配置传递 overwrite 参数
+3. 捕获复制错误信息
+4. 成功时显示 Toast（包含目标目录和最终文件名）
+5. 失败时显示 Toast（包含失败原因）
+6. 使用国际化文本显示提示信息,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量,feat: 实现文件复制核心逻辑
+T013,实现批量复制逻辑,在 ScriptCopy 类中实现批量复制逻辑，支持多文件复制，汇总成功和失败数量，显示批量操作结果,1. 支持批量复制多个文件
+2. 逐个复制文件，处理每个文件的复制结果
+3. 汇总成功和失败数量
+4. 批量成功时显示 Toast（包含成功数量/总数和目标目录）
+5. 批量失败时显示 Toast（包含失败原因）
+6. 异步执行，不阻塞 UI 线程,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量,feat: 实现批量复制逻辑
+T014,在 BulkView 添加多选状态管理,在 Www/ts/MainWindow/BulkView.ts 中添加多选状态管理，包括 selectedPaths Set 和 lastAnchorPath，实现多选状态的基础结构,1. selectedPaths Set 已添加，用于存储选中的文件路径
+2. lastAnchorPath 已添加，用于 Shift 区间选择
+3. 提供获取选中状态的方法
+4. 提供清空选择的方法
+5. 状态管理逻辑清晰，易于扩展,未开始,Www/ts/MainWindow/BulkView.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#6-bulk-view-多选实现路径,feat: 在 BulkView 添加多选状态管理
+T015,实现 BulkView 多选交互,在 BulkView.ts 中实现多选交互逻辑，支持 Ctrl+Click 切换选择、Shift+Click 区间选择、Click 清空选择并选中当前项,1. Ctrl+Click 切换选中状态
+2. Shift+Click 从 lastAnchorPath 到当前项做区间选择
+3. Click（无修饰键）清空选择并仅选中当前项
+4. 选中状态有视觉反馈（overlay/checkbox）
+5. 交互逻辑符合用户预期,未开始,Www/ts/MainWindow/BulkView.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#62-交互规则建议便于实现且符合用户预期,feat: 实现 BulkView 多选交互
+T016,在 BulkView 添加获取选中路径接口,在 BulkView.ts 中添加 getSelectedPathsOrFallbackCurrent 方法，返回选中的路径列表，若未选中则返回当前项路径,1. getSelectedPathsOrFallbackCurrent 方法已实现
+2. 选中数量 > 0 时返回 selectedPaths
+3. 选中数量 = 0 时返回当前项路径
+4. 当前项定义为聚焦项或最后点击项
+5. 方法签名清晰，易于调用,未开始,Www/ts/MainWindow/BulkView.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#63-对外接口,feat: 在 BulkView 添加获取选中路径接口
+T017,在 BulkView 添加清空选择接口,在 BulkView.ts 中添加 clearSelection 方法，清空所有选中状态，重置 lastAnchorPath,1. clearSelection 方法已实现
+2. 清空 selectedPaths Set
+3. 重置 lastAnchorPath 为 undefined
+4. 清除视觉选中状态（overlay/checkbox）
+5. 方法签名清晰，易于调用,未开始,Www/ts/MainWindow/BulkView.ts,docs/specs/26011009-copy-to-directory/PRD.md#核心功能,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#63-对外接口,feat: 在 BulkView 添加清空选择接口
+T018,在 Tiefseeview 新增变换检测方法,在 Www/ts/Tiefseeview.ts 中新增 hasTransformations 方法，检测当前图片是否存在旋转、镜像、缩放等需要保存的变换,1. hasTransformations 方法已实现
+2. 检测旋转角度（getDeg() % 360 !== 0）
+3. 检测水平镜像（getMirrorHorizontal()）
+4. 检测垂直镜像（getMirrorVertica()）
+5. 检测缩放比例（Math.abs(getZoomRatio() - 1) >= 0.05）
+6. 返回 boolean 表示是否存在需要保存的变换,未开始,Www/ts/Tiefseeview.ts,docs/specs/26011009-copy-to-directory/PRD.md#边缘情况处理,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#431-需要保存的判定建议,feat: 在 Tiefseeview 新增变换检测方法
+T019,在 Tiefseeview 新增带变换导出 API,在 Www/ts/Tiefseeview.ts 中新增 getTransformedCanvasBlob 方法，导出带旋转、镜像、缩放变换的 Canvas Blob，支持 PNG 格式,1. getTransformedCanvasBlob 方法已实现
+2. 从原始像素 canvas 取源图
+3. 按当前变换（旋转/镜像/缩放）绘制到新 canvas
+4. 输出 PNG 格式的 Blob
+5. 支持可选参数（如格式、质量）
+6. 大图导出时有内存限制和错误处理,未开始,Www/ts/Tiefseeview.ts,docs/specs/26011009-copy-to-directory/PRD.md#边缘情况处理,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#432-导出实现选型优先可维护性-复用,feat: 在 Tiefseeview 新增带变换导出 API
+T020,实现变换检测与保存确认逻辑,在 ScriptCopy 类中实现 resolveCopySourcePath 方法，检测图片是否存在变换，根据配置弹出确认对话框，用户确认后导出临时文件,1. resolveCopySourcePath 方法已实现
+2. 使用 Tiefseeview.hasTransformations 检测变换
+3. 根据 requireSaveWhenTransformed 配置决定是否提示
+4. 弹出确认对话框（使用 msg.copyToDirNeedSaveConfirm）
+5. 用户确认后调用 getTransformedCanvasBlob 导出
+6. 使用 WV_File.Base64ToTempFile 保存临时文件
+7. 临时文件命名格式为 {baseName}_saved_{yyyyMMdd_HHmmss_fff}.png
+8. 返回临时文件路径作为复制源
+9. 用户取消时返回原文件路径,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#边缘情况处理,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#43-变换检测与保存后复制,feat: 实现变换检测与保存确认逻辑
+T021,集成复制到目录完整流程,集成所有组件，完成复制到目录功能的完整流程，包括配置检查、源路径获取、变换检测、目标目录验证、文件复制、结果反馈,1. 普通浏览模式下按快捷键可复制当前图片
+2. Bulk View 模式下支持多选并批量复制
+3. 图片存在旋转/缩放变更时弹出保存确认
+4. Toast 成功提示包含目标目录与最终文件名
+5. Toast 失败提示包含失败原因
+6. 批量复制显示成功/失败数量
+7. 功能可通过配置完全禁用
+8. 快捷键响应延迟 < 50ms
+9. 文件复制操作在 100ms 内开始执行
+10. 复制操作不导致 UI 卡顿,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#验收标准,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#4-关键流程端到端,feat: 集成复制到目录完整流程
+T022,边缘情况处理与测试,处理各种边缘情况，包括目标目录不存在、目标目录不可写、同名文件冲突、磁盘空间不足、网络路径延迟、大文件复制、源文件被占用、路径包含特殊字符等,1. 目标目录不存在时根据配置自动创建或提示错误
+2. 目标目录不可写时显示明确错误信息
+3. 同名文件冲突时根据配置正确处理（覆盖/重命名/跳过）
+4. 磁盘空间不足时提前检测并提示
+5. 网络路径正常工作
+6. 大文件复制不阻塞 UI
+7. 源文件被占用时显示错误提示
+8. 路径包含特殊字符（中文、空格等）正常工作
+9. 所有边缘情况都有明确的错误提示,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#边缘情况处理,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#边缘情况处理,feat: 边缘情况处理与测试
+T023,Shortcut 模块单元测试,为 Shortcut 模块编写单元测试，覆盖 normalizeShortcut, match, isConflict 等方法，确保快捷键解析、匹配和冲突检测逻辑正确,1. 测试 normalizeShortcut 正确规范化快捷键字符串
+2. 测试 match 正确匹配 KeyboardEvent
+3. 测试 isConflict 正确检测快捷键冲突
+4. 测试单键和组合键的各种情况
+5. 测试大小写、空格等输入兼容性
+6. 所有测试通过,未开始,Www/ts/Shortcut.ts,docs/specs/26011009-copy-to-directory/PRD.md#验收标准,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#7-可测试性落地不依赖-uihost-的核心逻辑,feat: Shortcut 模块单元测试
+T024,时间戳重命名逻辑单元测试,为时间戳重命名逻辑编写单元测试，确保时间戳格式正确、冲突递增 _1/_2 规则正确,1. 测试时间戳格式为 yyyyMMdd_HHmmss_fff
+2. 测试目标文件不存在时直接使用原文件名
+3. 测试目标文件存在时追加时间戳
+4. 测试时间戳后仍冲突时追加 _1/_2...
+5. 测试不同扩展名的处理
+6. 所有测试通过,未开始,Www/ts/MainWindow/Script.ts,docs/specs/26011009-copy-to-directory/PRD.md#验收标准,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#7-可测试性落地不依赖-uihost-的核心逻辑,feat: 时间戳重命名逻辑单元测试
+T025,集成测试与端到端验证,进行集成测试和端到端验证，确保复制到目录功能在各种场景下正常工作，包括普通模式、Bulk View 多选、变换检测、边缘情况等,1. 普通浏览模式下复制当前图片成功
+2. Bulk View 模式下多选并批量复制成功
+3. 图片存在旋转/缩放变更时弹出保存确认并复制保存后的内容
+4. 目标目录不存在时根据配置自动创建
+5. 同名文件冲突时根据配置正确处理
+6. 网络路径正常工作
+7. 大文件复制不阻塞 UI
+8. 所有验收标准满足
+9. 性能指标满足要求（快捷键响应 < 50ms，复制开始 < 100ms）,未开始,,docs/specs/26011009-copy-to-directory/PRD.md#验收标准,docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#8-交付拆分低风险可回滚,feat: 集成测试与端到端验证
