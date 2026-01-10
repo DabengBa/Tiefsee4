@@ -430,6 +430,22 @@ export class Config {
             bulkViewScrollUpAlt: "prevPage",
             bulkViewScrollDownAlt: "nextPage",
         },
+
+        /** 複製到目錄 */
+        copyToDirectory: {
+            /** 是否啟用功能 */
+            enabled: false,
+            /** 目標目錄路徑 */
+            targetPath: "",
+            /** 快捷鍵 */
+            shortcut: "F1",
+            /** 同名檔案衝突處理方式 */
+            onConflict: "renameTimestamp",
+            /** 目標目錄不存在時自動建立 */
+            createDirIfNotExists: true,
+            /** 圖片存在變更時，複製前先儲存 */
+            requireSaveWhenTransformed: true,
+        },
     }
 
     private _allowFile_img: { ext: string; type: string; vipsType?: string; vipsType2?: string; }[] = [];
