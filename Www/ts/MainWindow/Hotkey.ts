@@ -1,5 +1,6 @@
 import { GroupType } from "../Config";
 import { Lib } from "../Lib";
+import { Shortcut } from "../Shortcut";
 import { MainWindow } from "./MainWindow";
 
 /**
@@ -166,6 +167,18 @@ export class Hotkey {
                     if (e.code === "KeyS" && e.ctrlKey) {
                         M.script.file.save();
                     }
+                    return;
+                }
+            }
+
+            // 複製到目錄快捷鍵
+            if (M.config.settings.copyToDirectory.enabled === true
+                && Lib.isTextFocused() === false
+                && Lib.isTxtSelect() === false
+            ) {
+                const shortcut = M.config.settings.copyToDirectory.shortcut;
+                if (Shortcut.match(e, shortcut)) {
+                    M.script.copy.copyToDirectory();
                     return;
                 }
             }

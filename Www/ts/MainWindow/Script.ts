@@ -1527,6 +1527,44 @@ export class ScriptCopy {
         await WV_System.SetClipboard_FileToText(path);
         Toast.show(this.M.i18n.t("msg.copyText"), 1000 * 3); // 已將「文字」複製至剪貼簿
     }
+
+    /** 複製到目錄 */
+    public async copyToDirectory() {
+        const config = this.M.config.settings.copyToDirectory;
+
+        if (config.enabled === false) {
+            return;
+        }
+
+        if (!config.targetPath || config.targetPath === "") {
+            Toast.show(this.M.i18n.t("msg.targetPathNotSet"), 1000 * 3);
+            return;
+        }
+
+        let sourcePaths: string[] = [];
+        if (this.M.fileLoad.getIsBulkView()) {
+            sourcePaths = this.M.bulkView.getSelectedPathsOrFallbackCurrent();
+        } else {
+            const filePath = this.M.fileLoad.getFilePath();
+            if (filePath) {
+                sourcePaths = [filePath];
+            }
+        }
+
+        if (sourcePaths.length === 0) {
+            return;
+        }
+
+        const targetDirExists = await WV_Directory.Exists(config.targetPath);
+        if (!targetDirExists) {
+            if (config.createDirIfNotExists) {
+                await WV_Directory.CreateDirectory(config.targetPath);
+            } else {
+                Toast.show(this.M.i18n.t("msg.targetDirNotExists"), 1000 * 3);
+                return;
+            }
+        }
+    }
 }
 
 export class ScriptSetting {

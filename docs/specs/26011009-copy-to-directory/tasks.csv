@@ -49,13 +49,13 @@
 5. 使用 Shortcut.match 匹配快捷键
 6. 调用 M.script.copy.copyToDirectory()
 7. 快捷键仅在 Tiefsee 窗口聚焦时生效
-8. Bulk View 模式下也能触发该快捷键（不被 Bulk View 分支提前 return 阻断）","未开始","Www/ts/MainWindow/Hotkey.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#41-触发入口hotkeyts","feat: 在 Hotkey.ts 添加复制到目录快捷键处理"
+8. Bulk View 模式下也能触发该快捷键（不被 Bulk View 分支提前 return 阻断）","已完成","Www/ts/MainWindow/Hotkey.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#41-触发入口hotkeyts","feat: 在 Hotkey.ts 添加复制到目录快捷键处理"
 "T010","在 ScriptCopy 添加 copyToDirectory 方法框架","在 Www/ts/MainWindow/Script.ts 的 ScriptCopy 类中添加 copyToDirectory 方法框架，实现配置检查、目标目录验证、源路径获取等基础逻辑","1. copyToDirectory 方法已添加到 ScriptCopy 类
 2. 检查功能是否启用（config.enabled）
 3. 验证目标目录是否设置
 4. 获取待复制的路径列表（普通模式或 Bulk View）
 5. 检查目标目录是否存在，根据配置决定是否创建
-6. 方法签名正确，支持异步执行","未开始","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#技术实现方案","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#42-源路径选择普通-vs-bulk-view","feat: 在 ScriptCopy 添加 copyToDirectory 方法框架"
+6. 方法签名正确，支持异步执行","已完成","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#技术实现方案","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#42-源路径选择普通-vs-bulk-view","feat: 在 ScriptCopy 添加 copyToDirectory 方法框架"
 "T011","实现时间戳重命名逻辑","在 ScriptCopy 类中实现 resolveConflictPath 方法，支持时间戳重命名策略，格式为 baseName_yyyyMMdd_HHmmss_fff.ext，若仍冲突则追加 _1/_2...","1. resolveConflictPath 方法已实现
 2. 时间戳格式为 yyyyMMdd_HHmmss_fff
 3. 若目标文件已存在，追加时间戳
