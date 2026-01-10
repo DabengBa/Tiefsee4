@@ -1565,7 +1565,62 @@ export class ScriptCopy {
             }
         }
 
-        await this.copyFilesBatch(sourcePaths, config.targetPath, config.onConflict);
+        await this.copyFilesBatch(sourcePaths, config.targetPath, config.onConflict, config.requireSaveWhenTransformed);
+    }
+
+    /**
+     * 解析複製源路徑（處理圖片變換）
+     * @param sourcePath 源路徑
+     * @param requireSaveWhenTransformed 是否在圖片有變換時要求保存
+     * @returns 解析後的源路徑
+     */
+    private async resolveCopySourcePath(sourcePath: string, requireSaveWhenTransformed: boolean): Promise<string> {
+        if (this.M.fileLoad.getIsBulkView()) {
+            return sourcePath;
+        }
+
+        const hasTransformations = this.M.fileShow.tiefseeview.hasTransformations();
+        if (!hasTransformations) {
+            return sourcePath;
+        }
+
+        if (!requireSaveWhenTransformed) {
+            return sourcePath;
+        }
+
+        const result = await new Promise<string>((resolve) => {
+            this.M.msgbox.show({
+                txt: this.M.i18n.t("msg.copyToDirNeedSaveConfirm"),
+                type: "txt",
+                isAllowClose: false,
+                funcYes: async (dom: HTMLElement) => {
+                    this.M.msgbox.close(dom);
+                    const blob = await this.M.fileShow.tiefseeview.getTransformedCanvasBlob("png", 0.9);
+                    if (blob === null) {
+                        resolve(sourcePath);
+                        return;
+                    }
+                    const base64 = await this.M.script.img.blobToBase64(blob) as string;
+                    if (typeof base64 !== "string") {
+                        resolve(sourcePath);
+                        return;
+                    }
+                    const fileName = Lib.getFileName(sourcePath);
+                    const baseName = Lib.getBaseName(fileName);
+                    const now = new Date();
+                    const timestamp = now.format("yyyyMMdd_HHmmss_fff");
+                    const tempFileName = `${baseName}_saved_${timestamp}.png`;
+                    const tempPath = await WV_File.Base64ToTempFile(base64, ".png");
+                    resolve(tempPath);
+                },
+                funcClose: (dom: HTMLElement) => {
+                    this.M.msgbox.close(dom);
+                    resolve(sourcePath);
+                }
+            });
+        });
+
+        return result;
     }
 
     /**
@@ -1573,32 +1628,34 @@ export class ScriptCopy {
      * @param sourcePaths 源路徑列表
      * @param targetDirPath 目標目錄路徑
      * @param onConflict 衝突處理策略
+     * @param requireSaveWhenTransformed 是否在圖片有變換時要求保存
      */
-    private async copyFilesBatch(sourcePaths: string[], targetDirPath: string, onConflict: string) {
+    private async copyFilesBatch(sourcePaths: string[], targetDirPath: string, onConflict: string, requireSaveWhenTransformed: boolean) {
         const isBatch = sourcePaths.length > 1;
         let successCount = 0;
         let failCount = 0;
         const failedFiles: string[] = [];
 
         for (const sourcePath of sourcePaths) {
-            const fileName = Lib.getFileName(sourcePath);
+            const resolvedSourcePath = await this.resolveCopySourcePath(sourcePath, requireSaveWhenTransformed);
+            const fileName = Lib.getFileName(resolvedSourcePath);
             const targetPath = `${targetDirPath}${fileName}`;
-            const resolvedPath = await this.resolveConflictPath(targetPath, onConflict);
+            const resolvedTargetPath = await this.resolveConflictPath(targetPath, onConflict);
 
-            if (resolvedPath === null) {
+            if (resolvedTargetPath === null) {
                 failCount++;
-                failedFiles.push(fileName);
+                failedFiles.push(Lib.getFileName(sourcePath));
                 continue;
             }
 
             const shouldOverwrite = onConflict === "overwrite";
-            const error = await WV_File.Copy(sourcePath, resolvedPath, shouldOverwrite);
+            const error = await WV_File.Copy(resolvedSourcePath, resolvedTargetPath, shouldOverwrite);
 
             if (error === "") {
                 successCount++;
             } else {
                 failCount++;
-                failedFiles.push(fileName);
+                failedFiles.push(Lib.getFileName(sourcePath));
             }
         }
 
@@ -1612,10 +1669,12 @@ export class ScriptCopy {
             }
         } else {
             if (successCount === 1) {
-                const fileName = Lib.getFileName(sourcePaths[0]);
-                const resolvedPath = await this.resolveConflictPath(`${targetDirPath}${fileName}`, onConflict);
-                if (resolvedPath) {
-                    Toast.show(`${this.M.i18n.t("msg.copyToDirSuccess")} ${Lib.getFileName(resolvedPath)}`, 1000 * 3);
+                const resolvedSourcePath = await this.resolveCopySourcePath(sourcePaths[0], requireSaveWhenTransformed);
+                const fileName = Lib.getFileName(resolvedSourcePath);
+                const targetPath = `${targetDirPath}${fileName}`;
+                const resolvedTargetPath = await this.resolveConflictPath(targetPath, onConflict);
+                if (resolvedTargetPath) {
+                    Toast.show(`${this.M.i18n.t("msg.copyToDirSuccess")} ${Lib.getFileName(resolvedTargetPath)}`, 1000 * 3);
                 }
             } else if (failCount === 1) {
                 Toast.show(`${this.M.i18n.t("msg.copyToDirFailed")}: ${failedFiles[0]}`, 1000 * 3);
