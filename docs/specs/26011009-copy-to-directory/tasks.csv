@@ -100,7 +100,7 @@
 "T026","Bulk View：ESC 优先清空选择","在 Www/ts/MainWindow/Hotkey.ts 的 Bulk View 分支中调整 ESC 行为：若 BulkView 存在已选择项则先 clearSelection（不退出 Bulk View）；否则沿用现有 ESC 退出 Bulk View","1. Bulk View 模式下按 ESC：若存在选择则只清空选择，不退出 Bulk View
 2. Bulk View 模式下按 ESC：若不存在选择则退出 Bulk View（保持现有行为）
 3. clearSelection 调用后选中态视觉反馈同步清除
-4. 不影响其它 Bulk View 快捷键行为","未开始","Www/ts/MainWindow/Hotkey.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#62-交互规则建议便于实现且符合用户预期","feat: BulkView ESC 优先清空选择"
+4. 不影响其它 Bulk View 快捷键行为","已完成","Www/ts/MainWindow/Hotkey.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#62-交互规则建议便于实现且符合用户预期","feat: BulkView ESC 优先清空选择"
 "T018","在 Tiefseeview 新增变换检测方法","在 Www/ts/Tiefseeview.ts 中新增 hasTransformations 方法，检测当前图片是否存在旋转、镜像、缩放等需要保存的变换","1. hasTransformations 方法已实现
 2. 检测旋转角度（getDeg() % 360 !== 0）
 3. 检测水平镜像（getMirrorHorizontal()）

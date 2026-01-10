@@ -132,7 +132,12 @@ export class Hotkey {
                     M.script.fileLoad.nextDir();
                 }
                 if (e.code == "Escape") {
-                    M.script.bulkView.close();
+                    const selectedPaths = M.bulkView.getSelectedPaths();
+                    if (selectedPaths.length > 0) {
+                        M.bulkView.clearSelection();
+                    } else {
+                        M.script.bulkView.close();
+                    }
                 }
                 if (e.code === "F2") {
                     M.script.fileLoad.showRenameMsg();
