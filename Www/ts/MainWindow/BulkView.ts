@@ -51,6 +51,11 @@ export class BulkView {
         const _domBoxWaterfall = _domMenu.querySelector(".js-box-waterfall") as HTMLDivElement;
         const _domBoxAlign = _domMenu.querySelector(".js-box-align") as HTMLDivElement;
 
+        /** 多選狀態 - 已選中的文件路徑集合 */
+        var _selectedPaths: Set<string> = new Set();
+        /** 多選狀態 - Shift 區間選擇的錨點路徑 */
+        var _lastAnchorPath: string | undefined = undefined;
+
         /** 名單列表 */
         var _arFile: string[] = [];
         /** 一頁顯示幾張圖片 */
@@ -105,6 +110,27 @@ export class BulkView {
         this.setFocus = () => {
             _domBulkViewContent.tabIndex = 0;
             _domBulkViewContent.focus();
+        }
+
+        /** 取得選中的路徑列表 */
+        this.getSelectedPaths = (): string[] => {
+            return Array.from(_selectedPaths);
+        }
+
+        /** 取得選中的路徑列表（如果未選中則回退到當前項） */
+        this.getSelectedPathsOrFallbackCurrent = (): string[] => {
+            if (_selectedPaths.size > 0) {
+                return Array.from(_selectedPaths);
+            }
+            const currentPath = getCurrentPath();
+            return currentPath ? [currentPath] : [];
+        }
+
+        /** 清空所有選中狀態 */
+        this.clearSelection = (): void => {
+            _selectedPaths.clear();
+            _lastAnchorPath = undefined;
+            updateSelectionVisuals();
         }
 
         initEvent();
@@ -1339,6 +1365,26 @@ export class BulkView {
             }
 
             domActive.setAttribute("active", "true");
+        }
+
+        /** 取得當前項的路徑 */
+        function getCurrentPath(): string | null {
+            const domFocus = _domBulkViewContent.querySelector("[data-focus=true]") as HTMLElement;
+            if (!domFocus) { return null; }
+            return domFocus.getAttribute("data-path") || null;
+        }
+
+        /** 更新選中狀態的視覺效果 */
+        function updateSelectionVisuals(): void {
+            const arDom = _domBulkViewContent.querySelectorAll("[data-path]");
+            arDom.forEach(dom => {
+                const path = dom.getAttribute("data-path");
+                if (path && _selectedPaths.has(path)) {
+                    dom.setAttribute("data-selected", "true");
+                } else {
+                    dom.setAttribute("data-selected", "false");
+                }
+            });
         }
 
     }
