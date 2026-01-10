@@ -3311,6 +3311,21 @@ export class Tiefseeview {
 
         // #endregion
 
+        /**
+         * 檢測當前圖片是否存在需要保存的變換（旋轉、鏡像、縮放）
+         * @returns {boolean} 是否存在需要保存的變換
+         */
+        this.hasTransformations = () => {
+            const deg = this.getDeg();
+            const hasRotation = deg % 360 !== 0;
+            const hasHorizontalMirror = this.getMirrorHorizontal();
+            const hasVerticalMirror = this.getMirrorVertica();
+            const zoomRatio = this.getZoomRatio();
+            const hasZoom = Math.abs(zoomRatio - 1) >= 0.05;
+
+            return hasRotation || hasHorizontalMirror || hasVerticalMirror || hasZoom;
+        };
+
     }
 }
 
