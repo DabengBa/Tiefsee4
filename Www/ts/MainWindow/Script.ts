@@ -1565,6 +1565,62 @@ export class ScriptCopy {
             }
         }
     }
+
+    /**
+     * 解決衝突路徑
+     * @param targetPath 目標路徑
+     * @param onConflict 衝突處理策略
+     * @returns 解決衝突後的路徑，若跳過則返回null
+     */
+    private async resolveConflictPath(targetPath: string, onConflict: string): Promise<string | null> {
+        const exists = await WV_File.Exists(targetPath);
+        if (!exists) {
+            return targetPath;
+        }
+
+        if (onConflict === "overwrite") {
+            return targetPath;
+        }
+
+        if (onConflict === "skip") {
+            return null;
+        }
+
+        if (onConflict === "renameTimestamp") {
+            return this.resolveWithTimestamp(targetPath);
+        }
+
+        return targetPath;
+    }
+
+    /**
+     * 使用時間戳重命名解決衝突
+     * @param targetPath 目標路徑
+     * @returns 解決衝突後的路徑
+     */
+    private async resolveWithTimestamp(targetPath: string): Promise<string> {
+        const dir = Lib.getDirPath(targetPath);
+        const fileName = Lib.getFileName(targetPath);
+        const baseName = Lib.getBaseName(fileName);
+        const ext = Lib.getExtName(fileName);
+
+        const now = new Date();
+        const timestamp = now.format("yyyyMMdd_HHmmss_fff");
+        let newPath = `${dir}${baseName}_${timestamp}${ext}`;
+
+        if (!(await WV_File.Exists(newPath))) {
+            return newPath;
+        }
+
+        let counter = 1;
+        while (true) {
+            newPath = `${dir}${baseName}_${timestamp}_${counter}${ext}`;
+            if (!(await WV_File.Exists(newPath))) {
+                return newPath;
+            }
+            counter++;
+        }
+    }
 }
 
 export class ScriptSetting {
