@@ -1564,6 +1564,63 @@ export class ScriptCopy {
                 return;
             }
         }
+
+        await this.copyFilesBatch(sourcePaths, config.targetPath, config.onConflict);
+    }
+
+    /**
+     * 批量複製文件
+     * @param sourcePaths 源路徑列表
+     * @param targetDirPath 目標目錄路徑
+     * @param onConflict 衝突處理策略
+     */
+    private async copyFilesBatch(sourcePaths: string[], targetDirPath: string, onConflict: string) {
+        const isBatch = sourcePaths.length > 1;
+        let successCount = 0;
+        let failCount = 0;
+        const failedFiles: string[] = [];
+
+        for (const sourcePath of sourcePaths) {
+            const fileName = Lib.getFileName(sourcePath);
+            const targetPath = `${targetDirPath}${fileName}`;
+            const resolvedPath = await this.resolveConflictPath(targetPath, onConflict);
+
+            if (resolvedPath === null) {
+                failCount++;
+                failedFiles.push(fileName);
+                continue;
+            }
+
+            const shouldOverwrite = onConflict === "overwrite";
+            const error = await WV_File.Copy(sourcePath, resolvedPath, shouldOverwrite);
+
+            if (error === "") {
+                successCount++;
+            } else {
+                failCount++;
+                failedFiles.push(fileName);
+            }
+        }
+
+        if (isBatch) {
+            if (successCount === sourcePaths.length) {
+                Toast.show(this.M.i18n.t("msg.copyToDirBatchSuccess").replace("{0}", successCount.toString()).replace("{1}", targetDirPath), 1000 * 3);
+            } else if (failCount === sourcePaths.length) {
+                Toast.show(`${this.M.i18n.t("msg.copyToDirFailed")}: ${failedFiles.join(", ")}`, 1000 * 3);
+            } else {
+                Toast.show(`${this.M.i18n.t("msg.copyToDirBatchSuccess").replace("{0}", successCount.toString()).replace("{1}", targetDirPath)} (${failCount} failed)`, 1000 * 3);
+            }
+        } else {
+            if (successCount === 1) {
+                const fileName = Lib.getFileName(sourcePaths[0]);
+                const resolvedPath = await this.resolveConflictPath(`${targetDirPath}${fileName}`, onConflict);
+                if (resolvedPath) {
+                    Toast.show(`${this.M.i18n.t("msg.copyToDirSuccess")} ${Lib.getFileName(resolvedPath)}`, 1000 * 3);
+                }
+            } else if (failCount === 1) {
+                Toast.show(`${this.M.i18n.t("msg.copyToDirFailed")}: ${failedFiles[0]}`, 1000 * 3);
+            }
+        }
     }
 
     /**

@@ -67,13 +67,13 @@
 3. 捕获复制错误信息
 4. 成功时显示 Toast（包含目标目录和最终文件名）
 5. 失败时显示 Toast（包含失败原因）
-6. 使用国际化文本显示提示信息","未开始","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量","feat: 实现文件复制核心逻辑"
+6. 使用国际化文本显示提示信息","已完成","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量","feat: 实现文件复制核心逻辑"
 "T013","实现批量复制逻辑","在 ScriptCopy 类中实现批量复制逻辑，支持多文件复制，汇总成功和失败数量，显示批量操作结果","1. 支持批量复制多个文件
 2. 逐个复制文件，处理每个文件的复制结果
 3. 汇总成功和失败数量
 4. 批量成功时显示 Toast（包含成功数量/总数和目标目录）
 5. 批量失败时显示 Toast（包含失败原因）
-6. 异步执行，不阻塞 UI 线程","未开始","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量","feat: 实现批量复制逻辑"
+6. 异步执行，不阻塞 UI 线程","已完成","Www/ts/MainWindow/Script.ts","docs/specs/26011009-copy-to-directory/prd.md#核心功能","docs/specs/26011009-copy-to-directory/TECHNICAL_APPROACH.md#46-复制执行与反馈单个批量","feat: 实现批量复制逻辑"
 "T014","在 BulkView 添加多选状态管理","在 Www/ts/MainWindow/BulkView.ts 中添加多选状态管理，包括 selectedPaths Set 和 lastAnchorPath，实现多选状态的基础结构","1. selectedPaths Set 已添加，用于存储选中的文件路径
 2. lastAnchorPath 已添加，用于 Shift 区间选择
 3. 提供获取选中状态的方法
