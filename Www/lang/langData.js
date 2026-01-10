@@ -2581,6 +2581,54 @@ var langData = {
         },
         //#endregion
 
+        //#region copyToDirectory
+        copyToDirSuccess: {
+            "zh-TW": "已複製至 {dir}",
+            "zh-CN": "已复制至 {dir}",
+            "en": "Copied to {dir}",
+        },
+        copyToDirBatchSuccess: {
+            "zh-TW": "已複製 {success}/{total} 個檔案至 {dir}",
+            "zh-CN": "已复制 {success}/{total} 个文件至 {dir}",
+            "en": "Copied {success}/{total} files to {dir}",
+        },
+        copyToDirFailed: {
+            "zh-TW": "複製失敗：{error}",
+            "zh-CN": "复制失败：{error}",
+            "en": "Copy failed: {error}",
+        },
+        copyToDirNeedSaveConfirm: {
+            "zh-TW": "圖片已被修改，要儲存後再複製嗎？",
+            "zh-CN": "图片已被修改，要保存后再复制吗？",
+            "en": "Image has been modified. Do you want to save before copying?",
+        },
+        fileNotFound: {
+            "zh-TW": "檔案不存在",
+            "zh-CN": "文件不存在",
+            "en": "File not found",
+        },
+        targetPathNotSet: {
+            "zh-TW": "未設定目標目錄",
+            "zh-CN": "未设置目标目录",
+            "en": "Target directory not set",
+        },
+        targetDirNotExists: {
+            "zh-TW": "目標目錄不存在",
+            "zh-CN": "目标目录不存在",
+            "en": "Target directory does not exist",
+        },
+        fileSkipped: {
+            "zh-TW": "檔案已跳過",
+            "zh-CN": "文件已跳过",
+            "en": "File skipped",
+        },
+        shortcutConflict: {
+            "zh-TW": "快捷鍵衝突：{shortcut}",
+            "zh-CN": "快捷键冲突：{shortcut}",
+            "en": "Shortcut conflict: {shortcut}",
+        },
+        //#endregion
+
     },
 
     exif: {
