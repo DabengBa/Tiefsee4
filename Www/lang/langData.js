@@ -1264,6 +1264,88 @@ var langData = {
             },
         },
 
+        // 複製到目錄
+        copyToDirectory: {
+            title: {
+                "zh-TW": "複製到目錄",
+                "zh-CN": "复制到目录",
+                "en": "Copy to Directory",
+                "ja": "フォルダにコピー",
+            },
+            enabled: {
+                "zh-TW": "啟用功能",
+                "zh-CN": "启用功能",
+                "en": "Enable",
+                "ja": "有効化",
+            },
+            targetPath: {
+                "zh-TW": "目標目錄",
+                "zh-CN": "目标目录",
+                "en": "Target directory",
+                "ja": "コピー先フォルダ",
+            },
+            browse: {
+                "zh-TW": "瀏覽",
+                "zh-CN": "浏览",
+                "en": "Browse",
+                "ja": "参照",
+            },
+            dialogTitle: {
+                "zh-TW": "選擇目標目錄",
+                "zh-CN": "选择目标目录",
+                "en": "Select target directory",
+                "ja": "コピー先フォルダを選択",
+            },
+            shortcut: {
+                "zh-TW": "快捷鍵",
+                "zh-CN": "快捷键",
+                "en": "Shortcut",
+                "ja": "ショートカット",
+            },
+            shortcutTooltip: {
+                "zh-TW": "支援單鍵（例如 F1）或組合鍵（例如 Ctrl+Alt+D）。留空表示停用。",
+                "zh-CN": "支持单键（例如 F1）或组合键（例如 Ctrl+Alt+D）。留空表示禁用。",
+                "en": "Supports single key (e.g. F1) or combo (e.g. Ctrl+Alt+D). Empty to disable.",
+                "ja": "単キー（例: F1）または複合キー（例: Ctrl+Alt+D）に対応。空欄で無効。",
+            },
+            onConflict: {
+                "zh-TW": "同名檔案處理",
+                "zh-CN": "同名文件处理",
+                "en": "On conflict",
+                "ja": "同名時の処理",
+            },
+            onConflictRenameTimestamp: {
+                "zh-TW": "時間戳重命名（預設）",
+                "zh-CN": "时间戳重命名（默认）",
+                "en": "Rename with timestamp (default)",
+                "ja": "タイムスタンプでリネーム（既定）",
+            },
+            onConflictOverwrite: {
+                "zh-TW": "覆蓋",
+                "zh-CN": "覆盖",
+                "en": "Overwrite",
+                "ja": "上書き",
+            },
+            onConflictSkip: {
+                "zh-TW": "跳過",
+                "zh-CN": "跳过",
+                "en": "Skip",
+                "ja": "スキップ",
+            },
+            createDirIfNotExists: {
+                "zh-TW": "目標目錄不存在時自動建立",
+                "zh-CN": "目标目录不存在时自动创建",
+                "en": "Create directory if missing",
+                "ja": "フォルダが無い場合は作成",
+            },
+            requireSaveWhenTransformed: {
+                "zh-TW": "圖片存在變更時，複製前先儲存",
+                "zh-CN": "图片存在变更时，复制前先保存",
+                "en": "Save before copying if modified",
+                "ja": "変更がある場合はコピー前に保存",
+            },
+        },
+
         // 重設設定
         reset: {
             resetSettings: {

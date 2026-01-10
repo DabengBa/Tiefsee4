@@ -67,6 +67,30 @@ export class Lib {
     }
 
     /**
+     * 取得副檔名（同 getExtension）
+     */
+    public static getExtName = (path: string) => {
+        return Lib.getExtension(path);
+    }
+
+    /**
+     * 取得檔名（不包含副檔名）。例如「abc」
+     */
+    public static getBaseName = (path: string) => {
+        const fileName = Lib.getFileName(path);
+        const ext = Lib.getExtension(fileName);
+        if (!ext) { return fileName; }
+        return fileName.substring(0, fileName.length - ext.length);
+    }
+
+    /**
+     * 取得資料夾路徑（同 getDirectoryName）
+     */
+    public static getDirPath = (path: string) => {
+        return Lib.getDirectoryName(path);
+    }
+
+    /**
      * 串接路徑
      * @param arPath 
      * @returns 

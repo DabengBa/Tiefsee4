@@ -5,6 +5,7 @@ import { Lib } from "../Lib";
 import { MainToolbar } from "../MainWindow/MainToolbar";
 import { Msgbox } from "../Msgbox";
 import { SelectionManager } from "../SelectionManager";
+import * as Shortcut from "../Shortcut";
 
 declare global {
     var settingWindow: SettingWindow;
@@ -1340,6 +1341,81 @@ class SettingWindow {
             select_highQualityLimit.addEventListener("change", () => {
                 let val = Number(select_highQualityLimit.value);
                 _config.settings["advanced"]["highQualityLimit"] = val;
+                appleSettingOfMain();
+            });
+        })
+
+        // 複製到目錄
+        addLoadEvent(() => {
+            const domEnabled = getDom("#switch-copyToDirectoryEnabled") as HTMLInputElement;
+            const domTargetPath = getDom("#text-copyToDirectoryTargetPath") as HTMLTextAreaElement;
+            const btnBrowse = getDom("#btn-copyToDirectoryBrowse") as HTMLElement;
+            const domShortcut = getDom("#text-copyToDirectoryShortcut") as HTMLInputElement;
+            const domOnConflict = getDom("#select-copyToDirectoryOnConflict") as HTMLSelectElement;
+            const domCreateDir = getDom("#switch-copyToDirectoryCreateDirIfNotExists") as HTMLInputElement;
+            const domRequireSave = getDom("#switch-copyToDirectoryRequireSaveWhenTransformed") as HTMLInputElement;
+
+            domEnabled.checked = _config.settings.copyToDirectory.enabled === true;
+            domTargetPath.value = _config.settings.copyToDirectory.targetPath ?? "";
+            domShortcut.value = _config.settings.copyToDirectory.shortcut ?? "";
+            domOnConflict.value = _config.settings.copyToDirectory.onConflict ?? "renameTimestamp";
+            domCreateDir.checked = _config.settings.copyToDirectory.createDirIfNotExists === true;
+            domRequireSave.checked = _config.settings.copyToDirectory.requireSaveWhenTransformed === true;
+
+            function sanitizePath(val: string): string {
+                return (val ?? "").replace(/\r?\n/g, "").trim();
+            }
+
+            domEnabled.addEventListener("change", () => {
+                _config.settings.copyToDirectory.enabled = domEnabled.checked;
+                appleSettingOfMain();
+            });
+
+            domTargetPath.addEventListener("change", () => {
+                const val = sanitizePath(domTargetPath.value);
+                domTargetPath.value = val;
+                _config.settings.copyToDirectory.targetPath = val;
+                appleSettingOfMain();
+            });
+
+            btnBrowse.addEventListener("click", async () => {
+                const currentPath = sanitizePath(domTargetPath.value) || sanitizePath(_config.settings.copyToDirectory.targetPath);
+                const title = _i18n.t("sw.copyToDirectory.dialogTitle");
+                const selected = await WV_Directory.OpenFolderDialog(title, currentPath);
+                const val = sanitizePath(selected);
+                if (!val) { return; }
+                domTargetPath.value = val;
+                _config.settings.copyToDirectory.targetPath = val;
+                appleSettingOfMain();
+            });
+
+            domShortcut.addEventListener("change", () => {
+                const raw = (domShortcut.value ?? "").trim();
+                if (!raw) {
+                    domShortcut.value = "";
+                    _config.settings.copyToDirectory.shortcut = "";
+                    appleSettingOfMain();
+                    return;
+                }
+
+                const norm = Shortcut.normalize(raw);
+                domShortcut.value = norm || raw;
+                _config.settings.copyToDirectory.shortcut = norm || raw;
+                appleSettingOfMain();
+            });
+
+            domOnConflict.addEventListener("change", () => {
+                _config.settings.copyToDirectory.onConflict = domOnConflict.value;
+                appleSettingOfMain();
+            });
+
+            domCreateDir.addEventListener("change", () => {
+                _config.settings.copyToDirectory.createDirIfNotExists = domCreateDir.checked;
+                appleSettingOfMain();
+            });
+
+            domRequireSave.addEventListener("change", () => {
+                _config.settings.copyToDirectory.requireSaveWhenTransformed = domRequireSave.checked;
                 appleSettingOfMain();
             });
         })

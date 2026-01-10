@@ -1332,6 +1332,22 @@ export class ScriptCopy {
         this.M = _M;
     }
 
+    private sanitizeFileName(fileName: string): string {
+        return (fileName ?? "").replace(/[<>:"/\\|?*]/g, "_").trim();
+    }
+
+    private async exportCurrentImageToTempPng(): Promise<string | null> {
+        const blob = await this.M.fileShow.tiefseeview.getTransformedCanvasBlob("png", 0.9);
+        if (blob === null) { return null; }
+
+        const base64 = await this.M.script.img.blobToBase64(blob);
+        if (typeof base64 !== "string") { return null; }
+
+        const tempPath = await WV_File.Base64ToTempFile(base64, "png");
+        if (!tempPath || tempPath === "false") { return null; }
+        return tempPath;
+    }
+
     /** 複製 檔案 */
     public async copyFile(path?: string) {
         if (path === undefined) {
@@ -1530,42 +1546,56 @@ export class ScriptCopy {
 
     /** 複製到目錄 */
     public async copyToDirectory() {
-        const config = this.M.config.settings.copyToDirectory;
+        try {
+            const config = this.M.config.settings.copyToDirectory;
 
-        if (config.enabled === false) {
-            return;
-        }
-
-        if (!config.targetPath || config.targetPath === "") {
-            Toast.show(this.M.i18n.t("msg.targetPathNotSet"), 1000 * 3);
-            return;
-        }
-
-        let sourcePaths: string[] = [];
-        if (this.M.fileLoad.getIsBulkView()) {
-            sourcePaths = this.M.bulkView.getSelectedPathsOrFallbackCurrent();
-        } else {
-            const filePath = this.M.fileLoad.getFilePath();
-            if (filePath) {
-                sourcePaths = [filePath];
-            }
-        }
-
-        if (sourcePaths.length === 0) {
-            return;
-        }
-
-        const targetDirExists = await WV_Directory.Exists(config.targetPath);
-        if (!targetDirExists) {
-            if (config.createDirIfNotExists) {
-                await WV_Directory.CreateDirectory(config.targetPath);
-            } else {
-                Toast.show(this.M.i18n.t("msg.targetDirNotExists"), 1000 * 3);
+            if (config.enabled === false) {
                 return;
             }
-        }
 
-        await this.copyFilesBatch(sourcePaths, config.targetPath, config.onConflict, config.requireSaveWhenTransformed);
+            const targetDirPath = (config.targetPath ?? "").replace(/\r?\n/g, "").trim();
+            if (!targetDirPath) {
+                Toast.show(this.M.i18n.t("msg.targetPathNotSet"), 1000 * 3);
+                return;
+            }
+
+            let sourcePaths: string[] = [];
+            let requireSaveWhenTransformed = config.requireSaveWhenTransformed === true;
+            if (this.M.fileLoad.getIsBulkView()) {
+                sourcePaths = this.M.bulkView.getSelectedPathsOrFallbackCurrent();
+            } else {
+                const filePath = this.M.fileLoad.getFilePath();
+                if (filePath) {
+                    sourcePaths = [filePath];
+                } else {
+                    const tempPath = await this.exportCurrentImageToTempPng();
+                    if (tempPath) {
+                        sourcePaths = [tempPath];
+                        requireSaveWhenTransformed = false;
+                    }
+                }
+            }
+
+            if (sourcePaths.length === 0) {
+                Toast.show(this.M.i18n.t("msg.fileNotFound"), 1000 * 3);
+                return;
+            }
+
+            const targetDirExists = await WV_Directory.Exists(targetDirPath);
+            if (!targetDirExists) {
+                if (config.createDirIfNotExists) {
+                    await WV_Directory.CreateDirectory(targetDirPath);
+                } else {
+                    Toast.show(this.M.i18n.t("msg.targetDirNotExists"), 1000 * 3);
+                    return;
+                }
+            }
+
+            await this.copyFilesBatch(sourcePaths, targetDirPath, config.onConflict, requireSaveWhenTransformed);
+        } catch (e: any) {
+            const err = (e?.message ?? e?.toString?.() ?? "Unknown error");
+            Toast.show(this.M.i18n.t("msg.copyToDirFailed").replace("{error}", err), 1000 * 3);
+        }
     }
 
     /**
@@ -1594,24 +1624,28 @@ export class ScriptCopy {
                 type: "txt",
                 isAllowClose: false,
                 funcYes: async (dom: HTMLElement) => {
-                    this.M.msgbox.close(dom);
-                    const blob = await this.M.fileShow.tiefseeview.getTransformedCanvasBlob("png", 0.9);
-                    if (blob === null) {
+                    try {
+                        this.M.msgbox.close(dom);
+                        const blob = await this.M.fileShow.tiefseeview.getTransformedCanvasBlob("png", 0.9);
+                        if (blob === null) {
+                            resolve(sourcePath);
+                            return;
+                        }
+                        const base64 = await this.M.script.img.blobToBase64(blob);
+                        if (typeof base64 !== "string") {
+                            resolve(sourcePath);
+                            return;
+                        }
+                        const tempPath = await WV_File.Base64ToTempFile(base64, "png");
+                        if (!tempPath || tempPath === "false") {
+                            resolve(sourcePath);
+                            return;
+                        }
+                        resolve(tempPath);
+                    } catch (e) {
+                        console.error(e);
                         resolve(sourcePath);
-                        return;
                     }
-                    const base64 = await this.M.script.img.blobToBase64(blob) as string;
-                    if (typeof base64 !== "string") {
-                        resolve(sourcePath);
-                        return;
-                    }
-                    const fileName = Lib.getFileName(sourcePath);
-                    const baseName = Lib.getBaseName(fileName);
-                    const now = new Date();
-                    const timestamp = now.format("yyyyMMdd_HHmmss_fff");
-                    const tempFileName = `${baseName}_saved_${timestamp}.png`;
-                    const tempPath = await WV_File.Base64ToTempFile(base64, ".png");
-                    resolve(tempPath);
                 },
                 funcClose: (dom: HTMLElement) => {
                     this.M.msgbox.close(dom);
@@ -1635,49 +1669,105 @@ export class ScriptCopy {
         let successCount = 0;
         let failCount = 0;
         const failedFiles: string[] = [];
+        let firstError: string | null = null;
+        let lastSuccessTargetPath: string | null = null;
 
         for (const sourcePath of sourcePaths) {
-            const resolvedSourcePath = await this.resolveCopySourcePath(sourcePath, requireSaveWhenTransformed);
-            const fileName = Lib.getFileName(resolvedSourcePath);
-            const targetPath = `${targetDirPath}${fileName}`;
+            const displayName = Lib.getFileName(sourcePath) || "image";
+
+            const copySourcePath = await this.resolveCopySourcePath(sourcePath, requireSaveWhenTransformed);
+            let resolvedSourcePath = copySourcePath;
+            let isExported = this.M.fileLoad.getIsBulkView() === false && copySourcePath !== sourcePath;
+
+            if (resolvedSourcePath && resolvedSourcePath.length > 255) {
+                resolvedSourcePath = await WV_Path.GetShortPath(resolvedSourcePath);
+            }
+
+            if (!(await WV_File.Exists(resolvedSourcePath))) {
+                const isCurrent = this.M.fileLoad.getIsBulkView() === false && sourcePath === this.M.fileLoad.getFilePath();
+                if (isCurrent) {
+                    const tempPath = await this.exportCurrentImageToTempPng();
+                    if (tempPath) {
+                        resolvedSourcePath = tempPath;
+                        isExported = true;
+                    }
+                }
+            }
+
+            if (!(await WV_File.Exists(resolvedSourcePath))) {
+                failCount++;
+                failedFiles.push(displayName);
+                if (firstError === null) {
+                    firstError = this.M.i18n.t("msg.fileNotFound");
+                }
+                continue;
+            }
+
+            const rawFileName = this.sanitizeFileName(Lib.getFileName(sourcePath) || Lib.getFileName(resolvedSourcePath) || "image");
+            const fileName = (() => {
+                if (!isExported) { return rawFileName || "image"; }
+                const baseName = Lib.getBaseName(rawFileName || "image") || "image";
+                return this.sanitizeFileName(`${baseName}.png`) || "image.png";
+            })();
+
+            const targetPath = Lib.combine([targetDirPath, fileName]);
             const resolvedTargetPath = await this.resolveConflictPath(targetPath, onConflict);
 
             if (resolvedTargetPath === null) {
                 failCount++;
-                failedFiles.push(Lib.getFileName(sourcePath));
+                failedFiles.push(displayName);
+                if (firstError === null) {
+                    firstError = this.M.i18n.t("msg.fileSkipped");
+                }
                 continue;
             }
 
             const shouldOverwrite = onConflict === "overwrite";
             const error = await WV_File.Copy(resolvedSourcePath, resolvedTargetPath, shouldOverwrite);
 
-            if (error === "") {
+            if (error === "" && (await WV_File.Exists(resolvedTargetPath))) {
                 successCount++;
+                lastSuccessTargetPath = resolvedTargetPath;
             } else {
                 failCount++;
-                failedFiles.push(Lib.getFileName(sourcePath));
+                failedFiles.push(displayName);
+                if (firstError === null) {
+                    firstError = error || this.M.i18n.t("msg.fileNotFound");
+                }
             }
         }
 
         if (isBatch) {
-            if (successCount === sourcePaths.length) {
-                Toast.show(this.M.i18n.t("msg.copyToDirBatchSuccess").replace("{0}", successCount.toString()).replace("{1}", targetDirPath), 1000 * 3);
-            } else if (failCount === sourcePaths.length) {
-                Toast.show(`${this.M.i18n.t("msg.copyToDirFailed")}: ${failedFiles.join(", ")}`, 1000 * 3);
+            const okToast = this.M.i18n.t("msg.copyToDirBatchSuccess")
+                .replace("{success}", successCount.toString())
+                .replace("{total}", sourcePaths.length.toString())
+                .replace("{dir}", targetDirPath);
+
+            if (failCount === 0) {
+                Toast.show(okToast, 1000 * 3);
+                return;
+            }
+
+            if (successCount === 0) {
+                const err = firstError ?? failedFiles.join(", ");
+                Toast.show(this.M.i18n.t("msg.copyToDirFailed").replace("{error}", err), 1000 * 3);
+                return;
+            }
+
+            if (firstError) {
+                Toast.show(`${okToast}\n${this.M.i18n.t("msg.copyToDirFailed").replace("{error}", firstError)}`, 1000 * 3);
             } else {
-                Toast.show(`${this.M.i18n.t("msg.copyToDirBatchSuccess").replace("{0}", successCount.toString()).replace("{1}", targetDirPath)} (${failCount} failed)`, 1000 * 3);
+                Toast.show(okToast, 1000 * 3);
             }
         } else {
             if (successCount === 1) {
-                const resolvedSourcePath = await this.resolveCopySourcePath(sourcePaths[0], requireSaveWhenTransformed);
-                const fileName = Lib.getFileName(resolvedSourcePath);
-                const targetPath = `${targetDirPath}${fileName}`;
-                const resolvedTargetPath = await this.resolveConflictPath(targetPath, onConflict);
-                if (resolvedTargetPath) {
-                    Toast.show(`${this.M.i18n.t("msg.copyToDirSuccess")} ${Lib.getFileName(resolvedTargetPath)}`, 1000 * 3);
+                if (lastSuccessTargetPath) {
+                    const toast = this.M.i18n.t("msg.copyToDirSuccess").replace("{dir}", targetDirPath);
+                    Toast.show(`${Lib.getFileName(lastSuccessTargetPath)}\n${toast}`, 1000 * 3);
                 }
             } else if (failCount === 1) {
-                Toast.show(`${this.M.i18n.t("msg.copyToDirFailed")}: ${failedFiles[0]}`, 1000 * 3);
+                const err = firstError ?? failedFiles[0];
+                Toast.show(this.M.i18n.t("msg.copyToDirFailed").replace("{error}", err), 1000 * 3);
             }
         }
     }
@@ -1722,7 +1812,7 @@ export class ScriptCopy {
 
         const now = new Date();
         const timestamp = now.format("yyyyMMdd_HHmmss_fff");
-        let newPath = `${dir}${baseName}_${timestamp}${ext}`;
+        let newPath = Lib.combine([dir, `${baseName}_${timestamp}${ext}`]);
 
         if (!(await WV_File.Exists(newPath))) {
             return newPath;
@@ -1730,7 +1820,7 @@ export class ScriptCopy {
 
         let counter = 1;
         while (true) {
-            newPath = `${dir}${baseName}_${timestamp}_${counter}${ext}`;
+            newPath = Lib.combine([dir, `${baseName}_${timestamp}_${counter}${ext}`]);
             if (!(await WV_File.Exists(newPath))) {
                 return newPath;
             }

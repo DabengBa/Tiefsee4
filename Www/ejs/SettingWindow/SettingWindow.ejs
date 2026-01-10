@@ -987,6 +987,62 @@
                     </div>
 
                     <div class="box">
+                        <div class="box-title" i18n="sw.copyToDirectory.title" data-toDom="copyToDirectory"> 複製到目錄 </div>
+
+                        <div class="text-title" i18n="sw.copyToDirectory.enabled"> 啟用功能 </div>
+                        <div class="text-content">
+                            <label class="switch">
+                                <input type="checkbox" id="switch-copyToDirectoryEnabled">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="text-title" i18n="sw.copyToDirectory.targetPath"> 目標目錄 </div>
+                        <div class="text-content">
+                            <textarea class="text-input" rows="2" id="text-copyToDirectoryTargetPath"></textarea>
+                        </div>
+                        <div class="text-content">
+                            <div class="btn" id="btn-copyToDirectoryBrowse" i18n="sw.copyToDirectory.browse">瀏覽</div>
+                        </div>
+
+                        <div class="text-title">
+                            <span i18n="sw.copyToDirectory.shortcut"> 快捷鍵 </span>
+                            <div class="img-help" data-i18n="sw.copyToDirectory.shortcutTooltip">
+                                <%- await readFile("./img/default/tool-help.svg"); %>
+                            </div>
+                        </div>
+                        <div class="text-content">
+                            <input class="text-input" id="text-copyToDirectoryShortcut">
+                        </div>
+
+                        <div class="text-title" i18n="sw.copyToDirectory.onConflict"> 同名檔案處理 </div>
+                        <div class="text-content">
+                            <select class="text-input" id="select-copyToDirectoryOnConflict">
+                                <option value="renameTimestamp" i18n="sw.copyToDirectory.onConflictRenameTimestamp">時間戳重命名</option>
+                                <option value="overwrite" i18n="sw.copyToDirectory.onConflictOverwrite">覆蓋</option>
+                                <option value="skip" i18n="sw.copyToDirectory.onConflictSkip">跳過</option>
+                            </select>
+                        </div>
+
+                        <div class="text-title" i18n="sw.copyToDirectory.createDirIfNotExists"> 目標目錄不存在時自動建立 </div>
+                        <div class="text-content">
+                            <label class="switch">
+                                <input type="checkbox" id="switch-copyToDirectoryCreateDirIfNotExists">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <div class="text-title" i18n="sw.copyToDirectory.requireSaveWhenTransformed"> 圖片存在變更時，複製前先儲存 </div>
+                        <div class="text-content">
+                            <label class="switch">
+                                <input type="checkbox" id="switch-copyToDirectoryRequireSaveWhenTransformed">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="box">
                         <div class="box-title" i18n="sw.reset.resetSettings"> 重設設定 </div>
 
                         <div class="text-title" i18n="sw.reset.restoreDefaultSettings"> 將設定還原為其預設值 </div>

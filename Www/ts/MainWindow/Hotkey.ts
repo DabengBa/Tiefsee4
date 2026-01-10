@@ -1,6 +1,6 @@
 import { GroupType } from "../Config";
 import { Lib } from "../Lib";
-import { Shortcut } from "../Shortcut";
+import * as Shortcut from "../Shortcut";
 import { MainWindow } from "./MainWindow";
 
 /**
@@ -108,6 +108,19 @@ export class Hotkey {
                 return;
             }
 
+            // 複製到目錄快捷鍵（需在 Bulk View return 之前判斷，避免被阻斷）
+            if (M.config.settings.copyToDirectory.enabled === true
+                && Lib.isTextFocused() === false
+                && Lib.isTxtSelect() === false
+            ) {
+                const shortcut = M.config.settings.copyToDirectory.shortcut;
+                if (Shortcut.match(shortcut, e)) {
+                    e.preventDefault();
+                    await M.script.copy.copyToDirectory();
+                    return;
+                }
+            }
+
             // 如果有開啟大量瀏覽模式
             if (M.fileLoad.getIsBulkView()) {
 
@@ -167,18 +180,6 @@ export class Hotkey {
                     if (e.code === "KeyS" && e.ctrlKey) {
                         M.script.file.save();
                     }
-                    return;
-                }
-            }
-
-            // 複製到目錄快捷鍵
-            if (M.config.settings.copyToDirectory.enabled === true
-                && Lib.isTextFocused() === false
-                && Lib.isTxtSelect() === false
-            ) {
-                const shortcut = M.config.settings.copyToDirectory.shortcut;
-                if (Shortcut.match(e, shortcut)) {
-                    M.script.copy.copyToDirectory();
                     return;
                 }
             }

@@ -18,6 +18,45 @@ export interface ParsedShortcut {
     normalized: string;
 }
 
+function canonicalKeyFromToken(token: string): string {
+    if (!token) {
+        return '';
+    }
+
+    const t = token.trim();
+    if (!t) {
+        return '';
+    }
+
+    const lower = t.toLowerCase();
+
+    if (lower === ' ' || lower === 'space' || lower === 'spacebar') return 'Space';
+    if (lower === 'esc' || lower === 'escape') return 'Escape';
+    if (lower === 'enter' || lower === 'return') return 'Enter';
+    if (lower === 'tab') return 'Tab';
+    if (lower === 'backspace') return 'Backspace';
+    if (lower === 'delete' || lower === 'del') return 'Delete';
+
+    const fKeyMatch = lower.match(/^f(1[0-2]|[1-9])$/);
+    if (fKeyMatch) {
+        return `F${fKeyMatch[1]}`;
+    }
+
+    if (lower.length === 1) {
+        return lower.toUpperCase();
+    }
+
+    return '';
+}
+
+function canonicalKeyFromEvent(event: KeyboardEvent): string {
+    // event.key for Space is usually " " in browsers
+    if (event.key === ' ') {
+        return 'Space';
+    }
+    return canonicalKeyFromToken(event.key);
+}
+
 /**
  * 解析快捷键字符串
  * @param shortcut 快捷键字符串，如 "ctrl + alt + d"
@@ -28,7 +67,7 @@ export function parse(shortcut: string): ParsedShortcut {
         return { key: '', ctrl: false, alt: false, shift: false, normalized: '' };
     }
 
-    const parts = shortcut.toLowerCase().split('+').map(s => s.trim());
+    const parts = shortcut.split('+').map(s => s.trim());
     const result: ParsedShortcut = {
         key: '',
         ctrl: false,
@@ -38,14 +77,18 @@ export function parse(shortcut: string): ParsedShortcut {
     };
 
     for (const part of parts) {
-        if (part === 'ctrl' || part === 'control') {
+        const lower = part.toLowerCase();
+        if (lower === 'ctrl' || lower === 'control') {
             result.ctrl = true;
-        } else if (part === 'alt') {
+        } else if (lower === 'alt') {
             result.alt = true;
-        } else if (part === 'shift') {
+        } else if (lower === 'shift') {
             result.shift = true;
-        } else if (part.length === 1 || part === 'escape' || part === 'space' || part === 'enter' || part === 'tab' || part === 'backspace' || part === 'delete') {
-            result.key = part.toUpperCase();
+        } else {
+            const key = canonicalKeyFromToken(part);
+            if (key) {
+                result.key = key;
+            }
         }
     }
 
@@ -87,16 +130,7 @@ export function match(shortcut: ShortcutKey | string, event: KeyboardEvent): boo
         return false;
     }
 
-    let eventKey = event.key.toUpperCase();
-    
-    if (eventKey === 'CONTROL') eventKey = 'Ctrl';
-    else if (eventKey === ' ') eventKey = 'Space';
-    else if (eventKey === 'ESCAPE') eventKey = 'Escape';
-    else if (eventKey === 'ENTER') eventKey = 'Enter';
-    else if (eventKey === 'TAB') eventKey = 'Tab';
-    else if (eventKey === 'BACKSPACE') eventKey = 'Backspace';
-    else if (eventKey === 'DELETE') eventKey = 'Delete';
-
+    const eventKey = canonicalKeyFromEvent(event);
     const keyMatch = parsed.key === eventKey;
     const ctrlMatch = parsed.ctrl === (event.ctrlKey || event.metaKey);
     const altMatch = parsed.alt === event.altKey;

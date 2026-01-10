@@ -3321,7 +3321,8 @@ export class Tiefseeview {
             const hasHorizontalMirror = this.getMirrorHorizontal();
             const hasVerticalMirror = this.getMirrorVertica();
             const zoomRatio = this.getZoomRatio();
-            const hasZoom = Math.abs(zoomRatio - 1) >= 0.05;
+            // 只有在「未跟隨視窗縮放」的情況下，才把縮放視為需要另存的變換
+            const hasZoom = this.getIsZoomWithWindow() === false && Math.abs(zoomRatio - 1) >= 0.05;
 
             return hasRotation || hasHorizontalMirror || hasVerticalMirror || hasZoom;
         };
