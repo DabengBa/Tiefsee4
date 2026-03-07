@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "Tiefsee4.sln",
+    "projects": [
+      "BuildAll\\BuildAll.csproj",
+      "Tiefsee\\Tiefsee.csproj"
+    ]
+  }
+}
